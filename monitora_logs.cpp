@@ -69,13 +69,16 @@ std::vector<std::string> ParsearArquivoRegistros(
   return registros;
 }
 
+std::string ExtrairNomeBase(const std::string& caminho_log) {
+  const std::size_t separador = caminho_log.find_last_of("/\\");
+  return separador == std::string::npos ? caminho_log
+                                        : caminho_log.substr(separador + 1);
+}
+
 std::filesystem::path CaminhoTotal(const std::filesystem::path& caminho_lista,
                                    const std::string& caminho_log) {
-  const std::size_t separador = caminho_log.find_last_of("/\\");
-  const std::string nome_log = separador == std::string::npos
-                                   ? caminho_log
-                                   : caminho_log.substr(separador + 1);
-  return caminho_lista.parent_path() / ("total_" + nome_log);
+  return caminho_lista.parent_path() /
+         ("total_" + ExtrairNomeBase(caminho_log));
 }
 
 void EscreverTotal(const std::filesystem::path& caminho_total,
