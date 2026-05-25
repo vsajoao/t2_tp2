@@ -1,7 +1,10 @@
 #include "monitora_logs.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <string>
+#include <vector>
 
 namespace monitora_logs {
 
@@ -28,6 +31,51 @@ bool CaminhoLogExiste(const std::string& caminho_log) {
   return std::filesystem::exists(caminho_log);
 }
 
+std::string ChaveOrdenacaoRegistro(const std::string& registro) {
+  const int dia = std::stoi(registro.substr(0, registro.find('/')));
+  const std::size_t inicio_mes = registro.find('/') + 1;
+  const std::size_t fim_mes = registro.find('/', inicio_mes);
+  const int mes = std::stoi(registro.substr(inicio_mes, fim_mes - inicio_mes));
+  const int ano = std::stoi(registro.substr(fim_mes + 1, 4));
+  const std::string hora = registro.substr(registro.find(' ') + 1, 8);
+
+  return std::to_string(ano) + "/" + std::to_string(mes) + "/" +
+         std::to_string(dia) + " " + hora;
+}
+
+std::vector<std::string> LerRegistrosLog(const std::string& caminho_log) {
+  std::ifstream arquivo_log(caminho_log);
+  std::vector<std::string> registros;
+  std::string registro;
+  while (std::getline(arquivo_log, registro)) {
+    if (!registro.empty()) {
+      registros.push_back(registro);
+    }
+  }
+
+  std::sort(registros.begin(), registros.end(),
+            [](const std::string& esquerda, const std::string& direita) {
+              return ChaveOrdenacaoRegistro(esquerda) <
+                     ChaveOrdenacaoRegistro(direita);
+            });
+  return registros;
+}
+
+std::filesystem::path CaminhoTotal(const std::filesystem::path& caminho_lista,
+                                   const std::string& caminho_log) {
+  const std::filesystem::path nome_log =
+      std::filesystem::path(caminho_log).filename();
+  return caminho_lista.parent_path() / ("total_" + nome_log.string());
+}
+
+void EscreverTotal(const std::filesystem::path& caminho_total,
+                   const std::vector<std::string>& registros) {
+  std::ofstream total(caminho_total);
+  for (const std::string& registro : registros) {
+    total << registro << '\n';
+  }
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -38,17 +86,22 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
 
   int linhas_ignoradas = 0;
   int logs_ignorados = 0;
+  int logs_processados = 0;
   std::string linha;
   while (std::getline(lista_logs, linha)) {
     if (LinhaListaVazia(linha)) {
       ++linhas_ignoradas;
     } else if (!CaminhoLogExiste(linha)) {
       ++logs_ignorados;
+    } else {
+      const std::vector<std::string> registros = LerRegistrosLog(linha);
+      EscreverTotal(CaminhoTotal(caminho_lista_logs, linha), registros);
+      ++logs_processados;
     }
   }
 
-  return CriarResultado(CodigoResultado::kSucesso, 0, linhas_ignoradas,
-                        logs_ignorados);
+  return CriarResultado(CodigoResultado::kSucesso, logs_processados,
+                        linhas_ignoradas, logs_ignorados);
 }
 
 }  // namespace monitora_logs
