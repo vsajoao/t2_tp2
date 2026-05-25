@@ -257,3 +257,46 @@ TEST_CASE("TD09 logs de mesmo nome em diretorios diferentes combinam",
   REQUIRE(registros[0] == "16/1/2026 13:27:46  Registro Windows");
   REQUIRE(registros[1] == "18/1/2026 11:34:21  Registro Unix");
 }
+
+TEST_CASE("TD10 logs de nomes diferentes geram totais separados", "[td10]") {
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_td10";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_log_um = diretorio_teste / "log1.txt";
+  std::ofstream(caminho_log_um) << "16/1/2026 13:27:46  Registro log 1\n";
+
+  const std::filesystem::path caminho_log_dois = diretorio_teste / "log2.txt";
+  std::ofstream(caminho_log_dois) << "17/1/2026 14:17:46  Registro log 2\n";
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream lista(caminho_lista);
+  lista << caminho_log_um.string() << "\n";
+  lista << caminho_log_dois.string() << "\n";
+  lista.close();
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kSucesso);
+  REQUIRE(resultado.logs_processados == 2);
+  REQUIRE(resultado.totais_atualizados == 2);
+
+  const std::filesystem::path caminho_total_um =
+      diretorio_teste / "total_log1.txt";
+  const std::filesystem::path caminho_total_dois =
+      diretorio_teste / "total_log2.txt";
+  REQUIRE(std::filesystem::exists(caminho_total_um));
+  REQUIRE(std::filesystem::exists(caminho_total_dois));
+
+  std::ifstream total_um(caminho_total_um);
+  std::ifstream total_dois(caminho_total_dois);
+  std::string registro_um;
+  std::string registro_dois;
+  std::getline(total_um, registro_um);
+  std::getline(total_dois, registro_dois);
+
+  REQUIRE(registro_um == "16/1/2026 13:27:46  Registro log 1");
+  REQUIRE(registro_dois == "17/1/2026 14:17:46  Registro log 2");
+}
