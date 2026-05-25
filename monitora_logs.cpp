@@ -184,6 +184,25 @@ void PreencherRegistroLog(const std::smatch& grupos, RegistroLog* registro) {
   registro->mensagem = grupos[7].str();
 }
 
+bool AnoBissexto(int ano) {
+  return (ano % 4 == 0 && ano % 100 != 0) || ano % 400 == 0;
+}
+
+bool DataValida(const RegistroLog& registro) {
+  if (registro.mes < 1 || registro.mes > 12) {
+    return false;
+  }
+
+  const int dias_por_mes[] = {31, 28, 31, 30, 31, 30,
+                              31, 31, 30, 31, 30, 31};
+  int ultimo_dia = dias_por_mes[registro.mes - 1];
+  if (registro.mes == 2 && AnoBissexto(registro.ano)) {
+    ultimo_dia = 29;
+  }
+
+  return registro.dia >= 1 && registro.dia <= ultimo_dia;
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -212,7 +231,7 @@ bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro) {
   }
 
   PreencherRegistroLog(grupos, registro);
-  return true;
+  return DataValida(*registro);
 }
 
 }  // namespace monitora_logs
