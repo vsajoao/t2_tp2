@@ -53,12 +53,22 @@ std::vector<std::string> LerRegistrosLog(const std::string& caminho_log) {
     }
   }
 
-  std::sort(registros.begin(), registros.end(),
-            [](const std::string& esquerda, const std::string& direita) {
-              return ChaveOrdenacaoRegistro(esquerda) <
-                     ChaveOrdenacaoRegistro(direita);
-            });
+  std::stable_sort(registros.begin(), registros.end(),
+                   [](const std::string& esquerda,
+                      const std::string& direita) {
+                     return ChaveOrdenacaoRegistro(esquerda) <
+                            ChaveOrdenacaoRegistro(direita);
+                   });
   return registros;
+}
+
+void OrdenarRegistros(std::vector<std::string>* registros) {
+  std::stable_sort(registros->begin(), registros->end(),
+                   [](const std::string& esquerda,
+                      const std::string& direita) {
+                     return ChaveOrdenacaoRegistro(esquerda) <
+                            ChaveOrdenacaoRegistro(direita);
+                   });
 }
 
 std::filesystem::path CaminhoTotal(const std::filesystem::path& caminho_lista,
@@ -78,8 +88,18 @@ void EscreverTotal(const std::filesystem::path& caminho_total,
 
 void ProcessarLog(const std::filesystem::path& caminho_lista,
                   const std::string& caminho_log) {
-  const std::vector<std::string> registros = LerRegistrosLog(caminho_log);
-  EscreverTotal(CaminhoTotal(caminho_lista, caminho_log), registros);
+  std::vector<std::string> registros = LerRegistrosLog(caminho_log);
+  const std::filesystem::path caminho_total =
+      CaminhoTotal(caminho_lista, caminho_log);
+  if (std::filesystem::exists(caminho_total)) {
+    const std::vector<std::string> registros_total =
+        LerRegistrosLog(caminho_total.string());
+    registros.insert(registros.begin(), registros_total.begin(),
+                     registros_total.end());
+    OrdenarRegistros(&registros);
+  }
+
+  EscreverTotal(caminho_total, registros);
 }
 
 }  // namespace
