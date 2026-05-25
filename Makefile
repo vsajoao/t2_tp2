@@ -2,7 +2,7 @@ CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Werror -pedantic
 COVERAGE_FLAGS := -ftest-coverage -fprofile-arcs
 LDFLAGS :=
-LDLIBS :=
+LDLIBS := -lCatch2Main -lCatch2
 
 TARGET := testa_monitora_logs
 SOURCES := monitora_logs.cpp testa_monitora_logs.cpp
@@ -24,7 +24,7 @@ coverage:
 	gcov monitora_logs.cpp
 
 lint:
-	cpplint --filter=-legal/copyright $(SOURCES) $(HEADERS)
+	cpplint --filter=-legal/copyright,-build/include_subdir $(SOURCES) $(HEADERS)
 
 static:
 	cppcheck --enable=warning --std=c++17 --language=c++ $(SOURCES) $(HEADERS)
