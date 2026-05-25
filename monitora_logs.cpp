@@ -77,7 +77,10 @@ std::vector<std::string> ParsearArquivoRegistros(
   std::string registro;
   while (std::getline(arquivo_log, registro)) {
     if (!registro.empty()) {
-      ChaveOrdenacaoRegistro(registro);
+      RegistroLog registro_parseado = {};
+      if (!ParsearLinhaLog(registro, &registro_parseado)) {
+        throw std::invalid_argument("registro de log invalido");
+      }
       registros.push_back(registro);
     }
   }
