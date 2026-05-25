@@ -1,0 +1,102 @@
+Projeto
+=======
+
+Sistema de monitoramento de logs desenvolvido em C++17 para o Trabalho 2 de
+Tecnicas de Programacao 2. O programa le uma lista de arquivos de log, valida
+os registros encontrados e atualiza arquivos total_<nome_do_log> com os
+registros ordenados por data e hora.
+
+Arquivos principais
+===================
+
+- monitora_logs.hpp: interface publica do modulo de monitoramento.
+- monitora_logs.cpp: implementacao do modulo de monitoramento.
+- testa_monitora_logs.cpp: testes automatizados com Catch2.
+- Makefile: comandos de compilacao, teste e verificacao.
+- docs/tabela_decisao_regex.pdf: tabela de decisao e expressoes regulares
+  usadas para orientar os testes.
+
+Dependencias
+============
+
+O projeto espera as seguintes ferramentas instaladas:
+
+- g++
+- make
+- Catch2
+- gcov
+- cpplint
+- cppcheck
+- valgrind
+- doxygen
+
+Compilacao
+==========
+
+Para compilar o executavel de testes:
+
+make
+
+O executavel gerado chama-se:
+
+testa_monitora_logs
+
+Testes
+======
+
+Para compilar e executar os testes automatizados:
+
+make test
+
+Os testes cobrem os casos derivados da tabela de decisao e das expressoes
+regulares documentadas em docs/tabela_decisao_regex.pdf.
+
+Cobertura
+=========
+
+Para compilar com instrumentacao, executar os testes e gerar o arquivo .gcov:
+
+make coverage
+
+A cobertura minima exigida pelo enunciado e de 80% por modulo. O modulo
+principal do projeto e monitora_logs.cpp. Ao avaliar a saida do gcov, considerar
+a linha especifica desse arquivo.
+
+Verificacoes
+============
+
+Para verificar o estilo de codigo com cpplint:
+
+make lint
+
+Para executar analise estatica com cppcheck:
+
+make static
+
+Para executar analise dinamica com Valgrind:
+
+make valgrind
+
+Depuracao
+=========
+
+Para iniciar o GDB com o executavel de testes:
+
+make gdb
+
+Documentacao
+============
+
+Para gerar a documentacao Doxygen:
+
+make docs
+
+Esse alvo executa doxygen Doxyfile. Apos a configuracao do Doxyfile, a
+documentacao HTML deve ser gerada no diretorio html/.
+
+Limpeza
+=======
+
+Para remover o executavel e artefatos gerados por cobertura e Doxygen:
+
+make clean
