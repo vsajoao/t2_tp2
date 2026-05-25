@@ -151,6 +151,22 @@ CodigoResultado ProcessarLinhaLista(
   return codigo_log;
 }
 
+const std::regex& PadraoLinhaLog() {
+  static const std::regex padrao_linha(
+      R"(^([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) ([0-9]{1,2}):([0-9]{2}):([0-9]{2}) {2}(.{1,100})$)");
+  return padrao_linha;
+}
+
+void PreencherRegistroLog(const std::smatch& grupos, RegistroLog* registro) {
+  registro->dia = std::stoi(grupos[1].str());
+  registro->mes = std::stoi(grupos[2].str());
+  registro->ano = std::stoi(grupos[3].str());
+  registro->hora = std::stoi(grupos[4].str());
+  registro->minuto = std::stoi(grupos[5].str());
+  registro->segundo = std::stoi(grupos[6].str());
+  registro->mensagem = grupos[7].str();
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -173,20 +189,12 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
 }
 
 bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro) {
-  const std::regex padrao_linha(
-      R"(^([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) ([0-9]{1,2}):([0-9]{2}):([0-9]{2}) {2}(.{1,100})$)");
   std::smatch grupos;
-  if (!std::regex_match(linha, grupos, padrao_linha)) {
+  if (!std::regex_match(linha, grupos, PadraoLinhaLog())) {
     return false;
   }
 
-  registro->dia = std::stoi(grupos[1].str());
-  registro->mes = std::stoi(grupos[2].str());
-  registro->ano = std::stoi(grupos[3].str());
-  registro->hora = std::stoi(grupos[4].str());
-  registro->minuto = std::stoi(grupos[5].str());
-  registro->segundo = std::stoi(grupos[6].str());
-  registro->mensagem = grupos[7].str();
+  PreencherRegistroLog(grupos, registro);
   return true;
 }
 
