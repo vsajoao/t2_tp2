@@ -42,6 +42,14 @@ bool CaminhoLogExiste(const std::string& caminho_log) {
   return std::filesystem::exists(caminho_log);
 }
 
+std::string FormatarDataParaOrdenacao(int ano, int mes, int dia) {
+  std::ostringstream data;
+  data << std::setw(4) << std::setfill('0') << ano << "/" << std::setw(2)
+       << std::setfill('0') << mes << "/" << std::setw(2)
+       << std::setfill('0') << dia;
+  return data.str();
+}
+
 std::string ChaveOrdenacaoRegistro(const std::string& registro) {
   const int dia = std::stoi(registro.substr(0, registro.find('/')));
   const std::size_t inicio_mes = registro.find('/') + 1;
@@ -50,11 +58,7 @@ std::string ChaveOrdenacaoRegistro(const std::string& registro) {
   const int ano = std::stoi(registro.substr(fim_mes + 1, 4));
   const std::string hora = registro.substr(registro.find(' ') + 1, 8);
 
-  std::ostringstream chave;
-  chave << std::setw(4) << std::setfill('0') << ano << "/"
-        << std::setw(2) << std::setfill('0') << mes << "/" << std::setw(2)
-        << std::setfill('0') << dia << " " << hora;
-  return chave.str();
+  return FormatarDataParaOrdenacao(ano, mes, dia) + " " + hora;
 }
 
 void OrdenarRegistros(std::vector<std::string>* registros) {
