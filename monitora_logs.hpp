@@ -8,6 +8,7 @@ namespace monitora_logs {
 enum class CodigoResultado {
   kSucesso,
   kListaLogsInexistente,
+  kLogInvalido,
 };
 
 struct ResultadoMonitoramento {
