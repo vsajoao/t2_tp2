@@ -188,17 +188,21 @@ bool AnoBissexto(int ano) {
   return (ano % 4 == 0 && ano % 100 != 0) || ano % 400 == 0;
 }
 
+int DiasNoMes(int mes, int ano) {
+  const int dias_por_mes[] = {31, 28, 31, 30, 31, 30,
+                              31, 31, 30, 31, 30, 31};
+  if (mes == 2 && AnoBissexto(ano)) {
+    return 29;
+  }
+  return dias_por_mes[mes - 1];
+}
+
 bool DataValida(const RegistroLog& registro) {
   if (registro.mes < 1 || registro.mes > 12) {
     return false;
   }
 
-  const int dias_por_mes[] = {31, 28, 31, 30, 31, 30,
-                              31, 31, 30, 31, 30, 31};
-  int ultimo_dia = dias_por_mes[registro.mes - 1];
-  if (registro.mes == 2 && AnoBissexto(registro.ano)) {
-    ultimo_dia = 29;
-  }
+  const int ultimo_dia = DiasNoMes(registro.mes, registro.ano);
 
   return registro.dia >= 1 && registro.dia <= ultimo_dia;
 }
