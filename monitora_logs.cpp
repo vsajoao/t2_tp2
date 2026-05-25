@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -70,6 +71,13 @@ void OrdenarRegistros(std::vector<std::string>* registros) {
                    });
 }
 
+void ValidarFormatoRegistroLog(const std::string& registro) {
+  RegistroLog registro_parseado = {};
+  if (!ParsearLinhaLog(registro, &registro_parseado)) {
+    throw std::invalid_argument("registro de log fora do formato esperado");
+  }
+}
+
 std::vector<std::string> ParsearArquivoRegistros(
     const std::string& caminho_arquivo) {
   std::ifstream arquivo_log(caminho_arquivo);
@@ -77,10 +85,7 @@ std::vector<std::string> ParsearArquivoRegistros(
   std::string registro;
   while (std::getline(arquivo_log, registro)) {
     if (!registro.empty()) {
-      RegistroLog registro_parseado = {};
-      if (!ParsearLinhaLog(registro, &registro_parseado)) {
-        throw std::invalid_argument("registro de log invalido");
-      }
+      ValidarFormatoRegistroLog(registro);
       registros.push_back(registro);
     }
   }
