@@ -359,3 +359,31 @@ TEST_CASE("RX02 aceita dia e mes de dois digitos na ordenacao", "[rx02]") {
   REQUIRE(registros[0] == "10/2/2026 13:27:46  Registro de fevereiro");
   REQUIRE(registros[1] == "2/10/2026 17:45:38  Registro de outubro");
 }
+
+TEST_CASE("RX03 rejeita linha de log fora do formato lexical", "[rx03]") {
+  monitora_logs::RegistroLog registro = {};
+
+  const bool valido = monitora_logs::ParsearLinhaLog(
+      "16/1/2026 13:27:46 Mensagem sem dois espacos", &registro);
+
+  REQUIRE_FALSE(valido);
+
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_rx03";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_log = diretorio_teste / "log1.txt";
+  std::ofstream(caminho_log)
+      << "16/1/2026 13:27:46 Mensagem sem dois espacos\n";
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream(caminho_lista) << caminho_log.string() << "\n";
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kLogInvalido);
+  REQUIRE(resultado.logs_processados == 0);
+  REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
+}
