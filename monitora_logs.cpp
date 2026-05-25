@@ -24,6 +24,10 @@ bool LinhaListaVazia(const std::string& linha) {
   return linha.empty();
 }
 
+bool CaminhoLogExiste(const std::string& caminho_log) {
+  return std::filesystem::exists(caminho_log);
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -38,7 +42,7 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
   while (std::getline(lista_logs, linha)) {
     if (LinhaListaVazia(linha)) {
       ++linhas_ignoradas;
-    } else if (!std::filesystem::exists(linha)) {
+    } else if (!CaminhoLogExiste(linha)) {
       ++logs_ignorados;
     }
   }
