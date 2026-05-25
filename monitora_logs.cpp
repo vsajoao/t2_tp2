@@ -71,9 +71,11 @@ std::vector<std::string> ParsearArquivoRegistros(
 
 std::filesystem::path CaminhoTotal(const std::filesystem::path& caminho_lista,
                                    const std::string& caminho_log) {
-  const std::filesystem::path nome_log =
-      std::filesystem::path(caminho_log).filename();
-  return caminho_lista.parent_path() / ("total_" + nome_log.string());
+  const std::size_t separador = caminho_log.find_last_of("/\\");
+  const std::string nome_log = separador == std::string::npos
+                                   ? caminho_log
+                                   : caminho_log.substr(separador + 1);
+  return caminho_lista.parent_path() / ("total_" + nome_log);
 }
 
 void EscreverTotal(const std::filesystem::path& caminho_total,
