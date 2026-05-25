@@ -215,3 +215,45 @@ TEST_CASE("TD08 total existente invalido gera erro", "[td08]") {
 
   REQUIRE(conteudo_preservado == conteudo_total_original);
 }
+
+TEST_CASE("TD09 logs de mesmo nome em diretorios diferentes combinam",
+          "[td09]") {
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_td09";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste / "origem_unix");
+
+  const std::filesystem::path caminho_log_unix =
+      diretorio_teste / "origem_unix" / "log1.txt";
+  std::ofstream(caminho_log_unix) << "18/1/2026 11:34:21  Registro Unix\n";
+
+  const std::filesystem::path caminho_log_windows =
+      diretorio_teste / "origem_windows\\log1.txt";
+  std::ofstream(caminho_log_windows)
+      << "16/1/2026 13:27:46  Registro Windows\n";
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream lista(caminho_lista);
+  lista << caminho_log_unix.string() << "\n";
+  lista << caminho_log_windows.string() << "\n";
+  lista.close();
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kSucesso);
+  REQUIRE(resultado.logs_processados == 2);
+
+  const std::filesystem::path caminho_total =
+      diretorio_teste / "total_log1.txt";
+  std::ifstream total(caminho_total);
+  std::vector<std::string> registros;
+  std::string registro;
+  while (std::getline(total, registro)) {
+    registros.push_back(registro);
+  }
+
+  REQUIRE(registros.size() == 2);
+  REQUIRE(registros[0] == "16/1/2026 13:27:46  Registro Windows");
+  REQUIRE(registros[1] == "18/1/2026 11:34:21  Registro Unix");
+}
