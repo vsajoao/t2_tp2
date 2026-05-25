@@ -5,6 +5,21 @@
 
 namespace monitora_logs {
 
+/***************************************************************************
+ * Tipo: CodigoResultado
+ * Descricao
+ * Representa o estado final do processamento solicitado.
+ * Valores
+ * kSucesso - todos os logs existentes e validos foram processados.
+ * kListaLogsInexistente - a lista de logs nao pode ser aberta.
+ * kLogInvalido - um arquivo de log existente contem registro invalido.
+ * kTotalInvalido - um arquivo total existente contem registro invalido.
+ * Assertiva de entrada
+ * Nao se aplica.
+ * Assertiva de saida
+ * Todo ResultadoMonitoramento deve usar um destes codigos para indicar a
+ * situacao prevista pela tabela de decisao.
+ ***************************************************************************/
 enum class CodigoResultado {
   kSucesso,
   kListaLogsInexistente,
@@ -12,6 +27,23 @@ enum class CodigoResultado {
   kTotalInvalido,
 };
 
+/***************************************************************************
+ * Tipo: ResultadoMonitoramento
+ * Descricao
+ * Agrupa o codigo de resultado e os contadores produzidos pelo monitoramento.
+ * Campos
+ * codigo - situacao final encontrada no processamento.
+ * logs_processados - quantidade de logs existentes e validos processados.
+ * linhas_ignoradas - quantidade de linhas vazias ignoradas na lista.
+ * logs_ignorados - quantidade de caminhos ausentes ignorados na lista.
+ * totais_atualizados - quantidade de arquivos totais escritos com sucesso.
+ * Assertiva de entrada
+ * Nao se aplica.
+ * Assertiva de saida
+ * Os contadores devem ser maiores ou iguais a zero. Em caso de sucesso,
+ * codigo deve ser kSucesso; em caso de falha, codigo deve indicar a primeira
+ * falha prevista encontrada.
+ ***************************************************************************/
 struct ResultadoMonitoramento {
   CodigoResultado codigo;
   int logs_processados;
@@ -20,6 +52,24 @@ struct ResultadoMonitoramento {
   int totais_atualizados;
 };
 
+/***************************************************************************
+ * Tipo: RegistroLog
+ * Descricao
+ * Representa os campos extraidos de uma linha valida de log.
+ * Campos
+ * dia - dia do mes.
+ * mes - mes do ano.
+ * ano - ano com quatro digitos.
+ * hora - hora do dia.
+ * minuto - minuto da hora.
+ * segundo - segundo do minuto.
+ * mensagem - texto do registro, com tamanho entre 1 e 100 caracteres.
+ * Assertiva de entrada
+ * Nao se aplica.
+ * Assertiva de saida
+ * Quando produzido por ParsearLinhaLog com retorno true, deve conter data
+ * gregoriana valida, horario valido e mensagem nao vazia.
+ ***************************************************************************/
 struct RegistroLog {
   int dia;
   int mes;
