@@ -1,5 +1,6 @@
 #include "monitora_logs.hpp"
 
+#include <filesystem>
 #include <fstream>
 
 namespace monitora_logs {
@@ -8,8 +9,9 @@ namespace {
 
 ResultadoMonitoramento CriarResultado(CodigoResultado codigo,
                                       int logs_processados,
-                                      int linhas_ignoradas) {
-  return {codigo, logs_processados, linhas_ignoradas};
+                                      int linhas_ignoradas,
+                                      int logs_ignorados) {
+  return {codigo, logs_processados, linhas_ignoradas, logs_ignorados};
 }
 
 bool AbrirListaLogs(const std::string& caminho_lista_logs,
@@ -27,18 +29,22 @@ bool LinhaListaVazia(const std::string& linha) {
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
   std::ifstream lista_logs;
   if (!AbrirListaLogs(caminho_lista_logs, &lista_logs)) {
-    return CriarResultado(CodigoResultado::kListaLogsInexistente, 0, 0);
+    return CriarResultado(CodigoResultado::kListaLogsInexistente, 0, 0, 0);
   }
 
   int linhas_ignoradas = 0;
+  int logs_ignorados = 0;
   std::string linha;
   while (std::getline(lista_logs, linha)) {
     if (LinhaListaVazia(linha)) {
       ++linhas_ignoradas;
+    } else if (!std::filesystem::exists(linha)) {
+      ++logs_ignorados;
     }
   }
 
-  return CriarResultado(CodigoResultado::kSucesso, 0, linhas_ignoradas);
+  return CriarResultado(CodigoResultado::kSucesso, 0, linhas_ignoradas,
+                        logs_ignorados);
 }
 
 }  // namespace monitora_logs
