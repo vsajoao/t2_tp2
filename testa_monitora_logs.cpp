@@ -422,3 +422,34 @@ TEST_CASE("RX04 valida fevereiro vinte e nove apenas em ano bissexto",
   REQUIRE(resultado.logs_processados == 0);
   REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
 }
+
+TEST_CASE("RX05 rejeita hora minuto e segundo invalidos", "[rx05]") {
+  monitora_logs::RegistroLog registro_hora = {};
+  monitora_logs::RegistroLog registro_minuto = {};
+  monitora_logs::RegistroLog registro_segundo = {};
+
+  REQUIRE_FALSE(monitora_logs::ParsearLinhaLog(
+      "16/1/2026 24:27:46  Hora invalida", &registro_hora));
+  REQUIRE_FALSE(monitora_logs::ParsearLinhaLog(
+      "16/1/2026 13:60:46  Minuto invalido", &registro_minuto));
+  REQUIRE_FALSE(monitora_logs::ParsearLinhaLog(
+      "16/1/2026 13:27:60  Segundo invalido", &registro_segundo));
+
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_rx05";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_log = diretorio_teste / "log1.txt";
+  std::ofstream(caminho_log) << "16/1/2026 24:27:46  Hora invalida\n";
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream(caminho_lista) << caminho_log.string() << "\n";
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kLogInvalido);
+  REQUIRE(resultado.logs_processados == 0);
+  REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
+}
