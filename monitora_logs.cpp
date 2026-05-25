@@ -76,10 +76,15 @@ std::filesystem::path CaminhoTotal(const std::filesystem::path& caminho_lista,
 
 void EscreverTotal(const std::filesystem::path& caminho_total,
                    const std::vector<std::string>& registros) {
-  std::ofstream total(caminho_total);
+  const std::filesystem::path caminho_temporario =
+      caminho_total.string() + ".tmp";
+  std::ofstream total(caminho_temporario);
   for (const std::string& registro : registros) {
     total << registro << '\n';
   }
+  total.close();
+
+  std::filesystem::rename(caminho_temporario, caminho_total);
 }
 
 bool ProcessarLog(const std::filesystem::path& caminho_lista,
