@@ -207,6 +207,12 @@ bool DataValida(const RegistroLog& registro) {
   return registro.dia >= 1 && registro.dia <= ultimo_dia;
 }
 
+bool HorarioValido(const RegistroLog& registro) {
+  return registro.hora >= 0 && registro.hora <= 23 && registro.minuto >= 0 &&
+         registro.minuto <= 59 && registro.segundo >= 0 &&
+         registro.segundo <= 59;
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -235,7 +241,7 @@ bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro) {
   }
 
   PreencherRegistroLog(grupos, registro);
-  return DataValida(*registro);
+  return DataValida(*registro) && HorarioValido(*registro);
 }
 
 }  // namespace monitora_logs
