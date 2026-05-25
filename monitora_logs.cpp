@@ -43,6 +43,15 @@ std::string ChaveOrdenacaoRegistro(const std::string& registro) {
          std::to_string(dia) + " " + hora;
 }
 
+void OrdenarRegistros(std::vector<std::string>* registros) {
+  std::stable_sort(registros->begin(), registros->end(),
+                   [](const std::string& esquerda,
+                      const std::string& direita) {
+                     return ChaveOrdenacaoRegistro(esquerda) <
+                            ChaveOrdenacaoRegistro(direita);
+                   });
+}
+
 std::vector<std::string> LerRegistrosLog(const std::string& caminho_log) {
   std::ifstream arquivo_log(caminho_log);
   std::vector<std::string> registros;
@@ -53,22 +62,8 @@ std::vector<std::string> LerRegistrosLog(const std::string& caminho_log) {
     }
   }
 
-  std::stable_sort(registros.begin(), registros.end(),
-                   [](const std::string& esquerda,
-                      const std::string& direita) {
-                     return ChaveOrdenacaoRegistro(esquerda) <
-                            ChaveOrdenacaoRegistro(direita);
-                   });
+  OrdenarRegistros(&registros);
   return registros;
-}
-
-void OrdenarRegistros(std::vector<std::string>* registros) {
-  std::stable_sort(registros->begin(), registros->end(),
-                   [](const std::string& esquerda,
-                      const std::string& direita) {
-                     return ChaveOrdenacaoRegistro(esquerda) <
-                            ChaveOrdenacaoRegistro(direita);
-                   });
 }
 
 std::filesystem::path CaminhoTotal(const std::filesystem::path& caminho_lista,
