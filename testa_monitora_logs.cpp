@@ -316,3 +316,46 @@ TEST_CASE("RX01 aceita linha de log com dia e mes de um digito", "[rx01]") {
   REQUIRE(registro.segundo == 46);
   REQUIRE(registro.mensagem == "Mensagem curta");
 }
+
+TEST_CASE("RX02 aceita dia e mes de dois digitos na ordenacao", "[rx02]") {
+  monitora_logs::RegistroLog registro = {};
+
+  const bool valido = monitora_logs::ParsearLinhaLog(
+      "16/12/2026 13:27:46  Mensagem completa", &registro);
+
+  REQUIRE(valido);
+  REQUIRE(registro.dia == 16);
+  REQUIRE(registro.mes == 12);
+  REQUIRE(registro.ano == 2026);
+
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_rx02";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_log = diretorio_teste / "log1.txt";
+  std::ofstream log(caminho_log);
+  log << "2/10/2026 17:45:38  Registro de outubro\n";
+  log << "10/2/2026 13:27:46  Registro de fevereiro\n";
+  log.close();
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream(caminho_lista) << caminho_log.string() << "\n";
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  const std::filesystem::path caminho_total =
+      diretorio_teste / "total_log1.txt";
+  std::ifstream total(caminho_total);
+  std::vector<std::string> registros;
+  std::string linha;
+  while (std::getline(total, linha)) {
+    registros.push_back(linha);
+  }
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kSucesso);
+  REQUIRE(registros.size() == 2);
+  REQUIRE(registros[0] == "10/2/2026 13:27:46  Registro de fevereiro");
+  REQUIRE(registros[1] == "2/10/2026 17:45:38  Registro de outubro");
+}
