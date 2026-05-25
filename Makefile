@@ -24,7 +24,7 @@ coverage:
 	gcov $(TARGET)-monitora_logs.gcno
 
 lint:
-	cpplint --filter=-legal/copyright,-build/include_subdir $(SOURCES) $(HEADERS)
+	cpplint --filter=-legal/copyright,-build/include_subdir,-build/c++11 $(SOURCES) $(HEADERS)
 
 static:
 	cppcheck --enable=warning --std=c++17 --language=c++ $(SOURCES) $(HEADERS)

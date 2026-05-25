@@ -4,6 +4,7 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -172,9 +173,21 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
 }
 
 bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro) {
-  (void)linha;
-  (void)registro;
-  return false;
+  const std::regex padrao_linha(
+      R"(^([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}) ([0-9]{1,2}):([0-9]{2}):([0-9]{2}) {2}(.{1,100})$)");
+  std::smatch grupos;
+  if (!std::regex_match(linha, grupos, padrao_linha)) {
+    return false;
+  }
+
+  registro->dia = std::stoi(grupos[1].str());
+  registro->mes = std::stoi(grupos[2].str());
+  registro->ano = std::stoi(grupos[3].str());
+  registro->hora = std::stoi(grupos[4].str());
+  registro->minuto = std::stoi(grupos[5].str());
+  registro->segundo = std::stoi(grupos[6].str());
+  registro->mensagem = grupos[7].str();
+  return true;
 }
 
 }  // namespace monitora_logs
