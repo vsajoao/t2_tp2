@@ -213,6 +213,10 @@ bool HorarioValido(const RegistroLog& registro) {
          registro.segundo <= 59;
 }
 
+bool RegistroLogValido(const RegistroLog& registro) {
+  return DataValida(registro) && HorarioValido(registro);
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -241,7 +245,7 @@ bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro) {
   }
 
   PreencherRegistroLog(grupos, registro);
-  return DataValida(*registro) && HorarioValido(*registro);
+  return RegistroLogValido(*registro);
 }
 
 }  // namespace monitora_logs
