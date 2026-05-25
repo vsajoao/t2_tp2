@@ -53,8 +53,9 @@ void OrdenarRegistros(std::vector<std::string>* registros) {
                    });
 }
 
-std::vector<std::string> LerRegistrosLog(const std::string& caminho_log) {
-  std::ifstream arquivo_log(caminho_log);
+std::vector<std::string> ParsearArquivoRegistros(
+    const std::string& caminho_arquivo) {
+  std::ifstream arquivo_log(caminho_arquivo);
   std::vector<std::string> registros;
   std::string registro;
   while (std::getline(arquivo_log, registro)) {
@@ -92,7 +93,7 @@ CodigoResultado ProcessarLog(const std::filesystem::path& caminho_lista,
                              const std::string& caminho_log) {
   std::vector<std::string> registros;
   try {
-    registros = LerRegistrosLog(caminho_log);
+    registros = ParsearArquivoRegistros(caminho_log);
   } catch (const std::exception&) {
     return CodigoResultado::kLogInvalido;
   }
@@ -102,7 +103,7 @@ CodigoResultado ProcessarLog(const std::filesystem::path& caminho_lista,
   if (std::filesystem::exists(caminho_total)) {
     try {
       const std::vector<std::string> registros_total =
-          LerRegistrosLog(caminho_total.string());
+          ParsearArquivoRegistros(caminho_total.string());
       registros.insert(registros.begin(), registros_total.begin(),
                        registros_total.end());
       OrdenarRegistros(&registros);
