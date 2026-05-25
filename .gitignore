@@ -2,6 +2,13 @@
 .agents/
 .codex/
 
+# Local study/planning materials
+Aula_Testes_caixa_fechada.pdf
+Aula_assertivas.pdf
+TP2_trab_2_sistema_monitoramento_logs.pdf
+dissertacao_aulas.md
+plano_por_etapas_tp2.md
+
 # Build outputs
 *.o
 *.obj
