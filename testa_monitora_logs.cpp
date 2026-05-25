@@ -48,3 +48,24 @@ TEST_CASE("TD03 linha vazia na lista e ignorada", "[td03]") {
   REQUIRE(resultado.linhas_ignoradas == 1);
   REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
 }
+
+TEST_CASE("TD04 log listado inexistente e ignorado", "[td04]") {
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_td04";
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_log_inexistente =
+      diretorio_teste / "log1.txt";
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream lista(caminho_lista);
+  lista << caminho_log_inexistente.string() << "\n";
+  lista.close();
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kSucesso);
+  REQUIRE(resultado.logs_processados == 0);
+  REQUIRE(resultado.logs_ignorados == 1);
+  REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
+}
