@@ -14,8 +14,10 @@ namespace {
 ResultadoMonitoramento CriarResultado(CodigoResultado codigo,
                                       int logs_processados,
                                       int linhas_ignoradas,
-                                      int logs_ignorados) {
-  return {codigo, logs_processados, linhas_ignoradas, logs_ignorados};
+                                      int logs_ignorados,
+                                      int totais_atualizados) {
+  return {codigo, logs_processados, linhas_ignoradas, logs_ignorados,
+          totais_atualizados};
 }
 
 bool AbrirListaLogs(const std::string& caminho_lista_logs,
@@ -126,12 +128,13 @@ CodigoResultado ProcessarLog(const std::filesystem::path& caminho_lista,
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
   std::ifstream lista_logs;
   if (!AbrirListaLogs(caminho_lista_logs, &lista_logs)) {
-    return CriarResultado(CodigoResultado::kListaLogsInexistente, 0, 0, 0);
+    return CriarResultado(CodigoResultado::kListaLogsInexistente, 0, 0, 0, 0);
   }
 
   int linhas_ignoradas = 0;
   int logs_ignorados = 0;
   int logs_processados = 0;
+  int totais_atualizados = 0;
   std::string linha;
   while (std::getline(lista_logs, linha)) {
     if (LinhaListaVazia(linha)) {
@@ -143,14 +146,15 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
           ProcessarLog(caminho_lista_logs, linha);
       if (codigo_log != CodigoResultado::kSucesso) {
         return CriarResultado(codigo_log, logs_processados, linhas_ignoradas,
-                              logs_ignorados);
+                              logs_ignorados, totais_atualizados);
       }
       ++logs_processados;
+      ++totais_atualizados;
     }
   }
 
   return CriarResultado(CodigoResultado::kSucesso, logs_processados,
-                        linhas_ignoradas, logs_ignorados);
+                        linhas_ignoradas, logs_ignorados, totais_atualizados);
 }
 
 }  // namespace monitora_logs

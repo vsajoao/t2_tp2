@@ -21,7 +21,7 @@ test: $(TARGET)
 coverage:
 	$(CXX) $(CXXFLAGS) $(COVERAGE_FLAGS) $(SOURCES) $(LDFLAGS) $(LDLIBS) -o $(TARGET)
 	./$(TARGET)
-	gcov monitora_logs.cpp
+	gcov $(TARGET)-monitora_logs.gcno
 
 lint:
 	cpplint --filter=-legal/copyright,-build/include_subdir $(SOURCES) $(HEADERS)
