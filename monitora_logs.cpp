@@ -18,6 +18,10 @@ bool AbrirListaLogs(const std::string& caminho_lista_logs,
   return lista_logs->is_open();
 }
 
+bool LinhaListaVazia(const std::string& linha) {
+  return linha.empty();
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -29,7 +33,7 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
   int linhas_ignoradas = 0;
   std::string linha;
   while (std::getline(lista_logs, linha)) {
-    if (linha.empty()) {
+    if (LinhaListaVazia(linha)) {
       ++linhas_ignoradas;
     }
   }
