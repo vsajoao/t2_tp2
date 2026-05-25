@@ -13,6 +13,7 @@ enum class CodigoResultado {
 struct ResultadoMonitoramento {
   CodigoResultado codigo;
   int logs_processados;
+  int linhas_ignoradas;
 };
 
 /***************************************************************************
@@ -23,12 +24,13 @@ struct ResultadoMonitoramento {
  * caminho_lista_logs - caminho do arquivo que contem a lista de logs.
  * Valor retornado
  * Resultado do monitoramento, incluindo o codigo da situacao encontrada e a
- * quantidade de arquivos de log processados.
+ * quantidade de arquivos de log processados e linhas de lista ignoradas.
  * Assertiva de entrada
  * caminho_lista_logs nao deve ser vazio.
  * Assertiva de saida
  * O codigo retornado deve representar sucesso ou uma falha prevista pela
- * tabela de decisao, e logs_processados deve ser maior ou igual a zero.
+ * tabela de decisao, logs_processados deve ser maior ou igual a zero, e
+ * linhas_ignoradas deve ser maior ou igual a zero.
  ***************************************************************************/
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs);
 
