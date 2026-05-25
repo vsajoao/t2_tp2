@@ -76,6 +76,12 @@ void EscreverTotal(const std::filesystem::path& caminho_total,
   }
 }
 
+void ProcessarLog(const std::filesystem::path& caminho_lista,
+                  const std::string& caminho_log) {
+  const std::vector<std::string> registros = LerRegistrosLog(caminho_log);
+  EscreverTotal(CaminhoTotal(caminho_lista, caminho_log), registros);
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
@@ -94,8 +100,7 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
     } else if (!CaminhoLogExiste(linha)) {
       ++logs_ignorados;
     } else {
-      const std::vector<std::string> registros = LerRegistrosLog(linha);
-      EscreverTotal(CaminhoTotal(caminho_lista_logs, linha), registros);
+      ProcessarLog(caminho_lista_logs, linha);
       ++logs_processados;
     }
   }
