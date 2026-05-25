@@ -51,31 +51,40 @@ std::string FormatarDataParaOrdenacao(int ano, int mes, int dia) {
   return data.str();
 }
 
-std::string ChaveOrdenacaoRegistro(const std::string& registro) {
-  const int dia = std::stoi(registro.substr(0, registro.find('/')));
-  const std::size_t inicio_mes = registro.find('/') + 1;
-  const std::size_t fim_mes = registro.find('/', inicio_mes);
-  const int mes = std::stoi(registro.substr(inicio_mes, fim_mes - inicio_mes));
-  const int ano = std::stoi(registro.substr(fim_mes + 1, 4));
-  const std::string hora = registro.substr(registro.find(' ') + 1, 8);
+std::string FormatarHorarioParaOrdenacao(const RegistroLog& registro) {
+  std::ostringstream horario;
+  horario << std::setw(2) << std::setfill('0') << registro.hora << ":"
+          << std::setw(2) << std::setfill('0') << registro.minuto << ":"
+          << std::setw(2) << std::setfill('0') << registro.segundo;
+  return horario.str();
+}
 
-  return FormatarDataParaOrdenacao(ano, mes, dia) + " " + hora;
+std::string ChaveOrdenacaoRegistro(const RegistroLog& registro) {
+  return FormatarDataParaOrdenacao(registro.ano, registro.mes, registro.dia) +
+         " " + FormatarHorarioParaOrdenacao(registro);
+}
+
+RegistroLog ParsearRegistroObrigatorio(const std::string& linha) {
+  RegistroLog registro = {};
+  if (!ParsearLinhaLog(linha, &registro)) {
+    throw std::invalid_argument("registro de log fora do formato esperado");
+  }
+  return registro;
+}
+
+void ValidarFormatoRegistroLog(const std::string& registro) {
+  ParsearRegistroObrigatorio(registro);
 }
 
 void OrdenarRegistros(std::vector<std::string>* registros) {
   std::stable_sort(registros->begin(), registros->end(),
                    [](const std::string& esquerda,
                       const std::string& direita) {
-                     return ChaveOrdenacaoRegistro(esquerda) <
-                            ChaveOrdenacaoRegistro(direita);
+                     return ChaveOrdenacaoRegistro(
+                                ParsearRegistroObrigatorio(esquerda)) <
+                            ChaveOrdenacaoRegistro(
+                                ParsearRegistroObrigatorio(direita));
                    });
-}
-
-void ValidarFormatoRegistroLog(const std::string& registro) {
-  RegistroLog registro_parseado = {};
-  if (!ParsearLinhaLog(registro, &registro_parseado)) {
-    throw std::invalid_argument("registro de log fora do formato esperado");
-  }
 }
 
 std::vector<std::string> ParsearArquivoRegistros(
