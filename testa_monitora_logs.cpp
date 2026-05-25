@@ -300,3 +300,19 @@ TEST_CASE("TD10 logs de nomes diferentes geram totais separados", "[td10]") {
   REQUIRE(registro_um == "16/1/2026 13:27:46  Registro log 1");
   REQUIRE(registro_dois == "17/1/2026 14:17:46  Registro log 2");
 }
+
+TEST_CASE("RX01 aceita linha de log com dia e mes de um digito", "[rx01]") {
+  monitora_logs::RegistroLog registro = {};
+
+  const bool valido = monitora_logs::ParsearLinhaLog(
+      "6/1/2026 13:27:46  Mensagem curta", &registro);
+
+  REQUIRE(valido);
+  REQUIRE(registro.dia == 6);
+  REQUIRE(registro.mes == 1);
+  REQUIRE(registro.ano == 2026);
+  REQUIRE(registro.hora == 13);
+  REQUIRE(registro.minuto == 27);
+  REQUIRE(registro.segundo == 46);
+  REQUIRE(registro.mensagem == "Mensagem curta");
+}

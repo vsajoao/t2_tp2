@@ -20,6 +20,16 @@ struct ResultadoMonitoramento {
   int totais_atualizados;
 };
 
+struct RegistroLog {
+  int dia;
+  int mes;
+  int ano;
+  int hora;
+  int minuto;
+  int segundo;
+  std::string mensagem;
+};
+
 /***************************************************************************
  * Funcao: MonitorarLogs
  * Descricao
@@ -39,6 +49,24 @@ struct ResultadoMonitoramento {
  * maior ou igual a zero. totais_atualizados deve ser maior ou igual a zero.
  ***************************************************************************/
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs);
+
+/***************************************************************************
+ * Funcao: ParsearLinhaLog
+ * Descricao
+ * Verifica e extrai os campos de uma linha de log.
+ * Parametros
+ * linha - linha completa no formato data, hora, dois espacos e mensagem.
+ * registro - ponteiro para receber os campos extraidos quando a linha e
+ * valida.
+ * Valor retornado
+ * true se a linha for valida; false caso contrario.
+ * Assertiva de entrada
+ * registro deve ser diferente de NULL.
+ * Assertiva de saida
+ * Se retornar true, registro deve conter data, hora e mensagem extraidas da
+ * linha. Se retornar false, a linha nao deve ser aceita como registro valido.
+ ***************************************************************************/
+bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro);
 
 }  // namespace monitora_logs
 

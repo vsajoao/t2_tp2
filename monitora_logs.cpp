@@ -171,4 +171,10 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
   return CriarResultado(CodigoResultado::kSucesso, contadores);
 }
 
+bool ParsearLinhaLog(const std::string& linha, RegistroLog* registro) {
+  (void)linha;
+  (void)registro;
+  return false;
+}
+
 }  // namespace monitora_logs
