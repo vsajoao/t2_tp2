@@ -11,11 +11,17 @@ ResultadoMonitoramento CriarResultado(CodigoResultado codigo,
   return {codigo, logs_processados};
 }
 
+bool AbrirListaLogs(const std::string& caminho_lista_logs,
+                    std::ifstream* lista_logs) {
+  lista_logs->open(caminho_lista_logs);
+  return lista_logs->is_open();
+}
+
 }  // namespace
 
 ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
-  std::ifstream lista_logs(caminho_lista_logs);
-  if (!lista_logs.is_open()) {
+  std::ifstream lista_logs;
+  if (!AbrirListaLogs(caminho_lista_logs, &lista_logs)) {
     return CriarResultado(CodigoResultado::kListaLogsInexistente, 0);
   }
 
