@@ -4,7 +4,9 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <regex>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -48,8 +50,11 @@ std::string ChaveOrdenacaoRegistro(const std::string& registro) {
   const int ano = std::stoi(registro.substr(fim_mes + 1, 4));
   const std::string hora = registro.substr(registro.find(' ') + 1, 8);
 
-  return std::to_string(ano) + "/" + std::to_string(mes) + "/" +
-         std::to_string(dia) + " " + hora;
+  std::ostringstream chave;
+  chave << std::setw(4) << std::setfill('0') << ano << "/"
+        << std::setw(2) << std::setfill('0') << mes << "/" << std::setw(2)
+        << std::setfill('0') << dia << " " << hora;
+  return chave.str();
 }
 
 void OrdenarRegistros(std::vector<std::string>* registros) {
