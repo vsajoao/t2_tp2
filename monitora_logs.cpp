@@ -1,6 +1,7 @@
 #include "monitora_logs.hpp"
 
 #include <algorithm>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -81,20 +82,27 @@ void EscreverTotal(const std::filesystem::path& caminho_total,
   }
 }
 
-void ProcessarLog(const std::filesystem::path& caminho_lista,
+bool ProcessarLog(const std::filesystem::path& caminho_lista,
                   const std::string& caminho_log) {
-  std::vector<std::string> registros = LerRegistrosLog(caminho_log);
-  const std::filesystem::path caminho_total =
-      CaminhoTotal(caminho_lista, caminho_log);
-  if (std::filesystem::exists(caminho_total)) {
-    const std::vector<std::string> registros_total =
-        LerRegistrosLog(caminho_total.string());
-    registros.insert(registros.begin(), registros_total.begin(),
-                     registros_total.end());
-    OrdenarRegistros(&registros);
+  std::vector<std::string> registros;
+  try {
+    registros = LerRegistrosLog(caminho_log);
+    const std::filesystem::path caminho_total =
+        CaminhoTotal(caminho_lista, caminho_log);
+    if (std::filesystem::exists(caminho_total)) {
+      const std::vector<std::string> registros_total =
+          LerRegistrosLog(caminho_total.string());
+      registros.insert(registros.begin(), registros_total.begin(),
+                       registros_total.end());
+      OrdenarRegistros(&registros);
+    }
+
+    EscreverTotal(caminho_total, registros);
+  } catch (const std::exception&) {
+    return false;
   }
 
-  EscreverTotal(caminho_total, registros);
+  return true;
 }
 
 }  // namespace
@@ -115,7 +123,10 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
     } else if (!CaminhoLogExiste(linha)) {
       ++logs_ignorados;
     } else {
-      ProcessarLog(caminho_lista_logs, linha);
+      if (!ProcessarLog(caminho_lista_logs, linha)) {
+        return CriarResultado(CodigoResultado::kLogInvalido, logs_processados,
+                              linhas_ignoradas, logs_ignorados);
+      }
       ++logs_processados;
     }
   }
