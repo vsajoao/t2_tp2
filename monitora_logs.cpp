@@ -59,6 +59,7 @@ std::vector<std::string> LerRegistrosLog(const std::string& caminho_log) {
   std::string registro;
   while (std::getline(arquivo_log, registro)) {
     if (!registro.empty()) {
+      ChaveOrdenacaoRegistro(registro);
       registros.push_back(registro);
     }
   }
@@ -87,27 +88,31 @@ void EscreverTotal(const std::filesystem::path& caminho_total,
   std::filesystem::rename(caminho_temporario, caminho_total);
 }
 
-bool ProcessarLog(const std::filesystem::path& caminho_lista,
-                  const std::string& caminho_log) {
+CodigoResultado ProcessarLog(const std::filesystem::path& caminho_lista,
+                             const std::string& caminho_log) {
   std::vector<std::string> registros;
   try {
     registros = LerRegistrosLog(caminho_log);
-    const std::filesystem::path caminho_total =
-        CaminhoTotal(caminho_lista, caminho_log);
-    if (std::filesystem::exists(caminho_total)) {
+  } catch (const std::exception&) {
+    return CodigoResultado::kLogInvalido;
+  }
+
+  const std::filesystem::path caminho_total =
+      CaminhoTotal(caminho_lista, caminho_log);
+  if (std::filesystem::exists(caminho_total)) {
+    try {
       const std::vector<std::string> registros_total =
           LerRegistrosLog(caminho_total.string());
       registros.insert(registros.begin(), registros_total.begin(),
                        registros_total.end());
       OrdenarRegistros(&registros);
+    } catch (const std::exception&) {
+      return CodigoResultado::kTotalInvalido;
     }
-
-    EscreverTotal(caminho_total, registros);
-  } catch (const std::exception&) {
-    return false;
   }
 
-  return true;
+  EscreverTotal(caminho_total, registros);
+  return CodigoResultado::kSucesso;
 }
 
 }  // namespace
@@ -128,9 +133,11 @@ ResultadoMonitoramento MonitorarLogs(const std::string& caminho_lista_logs) {
     } else if (!CaminhoLogExiste(linha)) {
       ++logs_ignorados;
     } else {
-      if (!ProcessarLog(caminho_lista_logs, linha)) {
-        return CriarResultado(CodigoResultado::kLogInvalido, logs_processados,
-                              linhas_ignoradas, logs_ignorados);
+      const CodigoResultado codigo_log =
+          ProcessarLog(caminho_lista_logs, linha);
+      if (codigo_log != CodigoResultado::kSucesso) {
+        return CriarResultado(codigo_log, logs_processados, linhas_ignoradas,
+                              logs_ignorados);
       }
       ++logs_processados;
     }
