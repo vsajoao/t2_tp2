@@ -184,3 +184,34 @@ TEST_CASE("TD07 log invalido gera erro e preserva total", "[td07]") {
 
   REQUIRE(conteudo_preservado == conteudo_total_original);
 }
+
+TEST_CASE("TD08 total existente invalido gera erro", "[td08]") {
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_td08";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_total =
+      diretorio_teste / "total_log1.txt";
+  const std::string conteudo_total_original = "total invalido\n";
+  std::ofstream(caminho_total) << conteudo_total_original;
+
+  const std::filesystem::path caminho_log = diretorio_teste / "log1.txt";
+  std::ofstream(caminho_log) << "16/1/2026 13:27:46  Registro novo\n";
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream(caminho_lista) << caminho_log.string() << "\n";
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kTotalInvalido);
+  REQUIRE(resultado.logs_processados == 0);
+
+  std::ifstream total_preservado(caminho_total);
+  const std::string conteudo_preservado(
+      (std::istreambuf_iterator<char>(total_preservado)),
+      std::istreambuf_iterator<char>());
+
+  REQUIRE(conteudo_preservado == conteudo_total_original);
+}

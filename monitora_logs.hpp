@@ -9,6 +9,7 @@ enum class CodigoResultado {
   kSucesso,
   kListaLogsInexistente,
   kLogInvalido,
+  kTotalInvalido,
 };
 
 struct ResultadoMonitoramento {
