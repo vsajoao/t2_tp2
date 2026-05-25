@@ -453,3 +453,35 @@ TEST_CASE("RX05 rejeita hora minuto e segundo invalidos", "[rx05]") {
   REQUIRE(resultado.logs_processados == 0);
   REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
 }
+
+TEST_CASE("RX06 rejeita mensagem com mais de cem caracteres", "[rx06]") {
+  const std::string mensagem_limite(100, 'a');
+  const std::string mensagem_excedente(101, 'b');
+  monitora_logs::RegistroLog registro_limite = {};
+  monitora_logs::RegistroLog registro_excedente = {};
+
+  REQUIRE(monitora_logs::ParsearLinhaLog(
+      "16/1/2026 13:27:46  " + mensagem_limite, &registro_limite));
+  REQUIRE(registro_limite.mensagem == mensagem_limite);
+  REQUIRE_FALSE(monitora_logs::ParsearLinhaLog(
+      "16/1/2026 13:27:46  " + mensagem_excedente, &registro_excedente));
+
+  const std::filesystem::path diretorio_teste =
+      std::filesystem::temp_directory_path() / "monitora_logs_rx06";
+  std::filesystem::remove_all(diretorio_teste);
+  std::filesystem::create_directories(diretorio_teste);
+
+  const std::filesystem::path caminho_log = diretorio_teste / "log1.txt";
+  std::ofstream(caminho_log)
+      << "16/1/2026 13:27:46  " << mensagem_excedente << "\n";
+
+  const std::filesystem::path caminho_lista = diretorio_teste / "logs.txt";
+  std::ofstream(caminho_lista) << caminho_log.string() << "\n";
+
+  const monitora_logs::ResultadoMonitoramento resultado =
+      monitora_logs::MonitorarLogs(caminho_lista.string());
+
+  REQUIRE(resultado.codigo == monitora_logs::CodigoResultado::kLogInvalido);
+  REQUIRE(resultado.logs_processados == 0);
+  REQUIRE_FALSE(std::filesystem::exists(diretorio_teste / "total_log1.txt"));
+}
